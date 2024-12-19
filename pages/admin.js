@@ -1,11 +1,14 @@
-// Adjusted admin.js (frontend/pages/admin.js)
+// frontend/pages/admin.js
+// Change "Admin Panel" to "Administrative Page", center it
+// Arrange each frame side by side (use a responsive grid)
+// More professional look
+
 import { useState, useEffect } from "react";
 
 export default function Admin() {
   const [activeTab, setActiveTab] = useState("current");
   const [periods, setPeriods] = useState([]);
   const [selectedPastPeriod, setSelectedPastPeriod] = useState(null);
-
   const [name, setName] = useState("");
   const [lga, setLga] = useState("");
   const [photoUrl, setPhotoUrl] = useState("");
@@ -16,7 +19,6 @@ export default function Admin() {
   const [showPreview, setShowPreview] = useState(false);
   const [message, setMessage] = useState("");
   const [period, setPeriod] = useState(null);
-
   const [pastCandidates, setPastCandidates] = useState([]);
   const [pastResults, setPastResults] = useState([]);
 
@@ -25,11 +27,6 @@ export default function Admin() {
     "Content-Type": "application/json",
     ...(token ? { "Authorization": "Bearer " + token } : {})
   };
-
-  useEffect(() => {
-    loadCurrentData();
-    loadAllPeriods();
-  }, []);
 
   const loadCurrentData = async () => {
     await loadCurrentPeriod();
@@ -44,6 +41,11 @@ export default function Admin() {
       setPeriods(data);
     }
   };
+
+  useEffect(() => {
+    loadCurrentData();
+    loadAllPeriods();
+  }, []);
 
   const loadCurrentPeriod = async () => {
     const res = await fetch("http://localhost:5000/api/admin/get-period", { headers });
@@ -152,37 +154,33 @@ export default function Admin() {
   }, [selectedPastPeriod]);
 
   return (
-    <div className="max-w-6xl mx-auto space-y-8">
-      <div className="flex justify-between items-center mt-4">
-        <h1 className="text-3xl font-bold text-gray-800">Admin Panel</h1>
-        {message && <p className="text-gray-700 font-medium">{message}</p>}
-      </div>
+    <div className="max-w-6xl mx-auto space-y-8 mt-10">
+      <h1 className="text-3xl font-bold text-gray-800 text-center">Administrative Page</h1>
+      {message && <p className="text-gray-700 font-medium text-center">{message}</p>}
 
-      <div className="flex space-x-4 border-b pb-2">
+      <div className="flex space-x-4 border-b pb-2 justify-center">
         <button 
           onClick={() => setActiveTab("current")} 
-          className={`pb-2 ${activeTab === "current" ? "border-b-2 border-blue-600 text-blue-600" : "text-gray-600"}`}
+          className={`pb-2 ${activeTab === "current" ? "border-b-2 border-blue-600 text-blue-600" : "text-gray-600"} focus:outline-none`}
         >
           Current Period
         </button>
         <button 
           onClick={() => setActiveTab("past")} 
-          className={`pb-2 ${activeTab === "past" ? "border-b-2 border-blue-600 text-blue-600" : "text-gray-600"}`}
+          className={`pb-2 ${activeTab === "past" ? "border-b-2 border-blue-600 text-blue-600" : "text-gray-600"} focus:outline-none`}
         >
           Past Periods
         </button>
       </div>
 
       {activeTab === "current" && (
-        <div className="space-y-8">
-          <div className="bg-white p-6 rounded-lg shadow space-y-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <div className="bg-white p-6 rounded-lg shadow space-y-4 border border-gray-200">
             <div className="flex justify-between items-center">
               <h2 className="text-xl font-semibold text-gray-800">Set Voting Period</h2>
-              <button onClick={loadCurrentData} className="bg-gray-200 hover:bg-gray-300 text-gray-800 py-1 px-3 rounded">
-                Refresh Current
-              </button>
+              <button onClick={loadCurrentData} className="bg-gray-200 hover:bg-gray-300 text-gray-800 py-1 px-3 rounded">Refresh</button>
             </div>
-            <div className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4">
+            <div className="space-y-4">
               <input
                 type="datetime-local"
                 className="border p-2 rounded w-full"
@@ -195,14 +193,13 @@ export default function Admin() {
                 value={endTime}
                 onChange={(e) => setEndTime(e.target.value)}
               />
-              <button onClick={setVotingPeriod} className="bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700 transition">
-                Set
-              </button>
+              <button onClick={setVotingPeriod} className="bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700 transition w-full">Set Period</button>
             </div>
             {period && (
-              <div className="text-gray-600 mt-2">
-                <p>Current Period ID: {period.id}</p>
-                <p>Starts {new Date(period.startTime).toLocaleString()}, Ends {new Date(period.endTime).toLocaleString()}</p>
+              <div className="text-gray-600 mt-2 text-sm">
+                <p>Period ID: {period.id}</p>
+                <p>Starts: {new Date(period.startTime).toLocaleString()}</p>
+                <p>Ends: {new Date(period.endTime).toLocaleString()}</p>
                 <div className="mt-2 flex flex-wrap gap-2">
                   <button onClick={endVotingEarly} className="bg-red-600 text-white py-1 px-3 rounded hover:bg-red-700 transition">End Voting Now</button>
                   {!period.resultsPublished && (
@@ -215,120 +212,120 @@ export default function Admin() {
             )}
           </div>
 
-          <div className="bg-white p-6 rounded-lg shadow space-y-4">
+          <div className="bg-white p-6 rounded-lg shadow space-y-4 border border-gray-200">
             <h2 className="text-xl font-semibold text-gray-800">Add Candidate (Current Period)</h2>
             <div className="space-y-2">
               <input
                 placeholder="Candidate Name"
                 className="border p-2 rounded w-full"
                 value={name}
-                onChange={(e) => setName(e.target.value)}
+                onChange={(e) => setName(e.target.value.trim())}
               />
               <input
                 placeholder="LGA"
                 className="border p-2 rounded w-full"
                 value={lga}
-                onChange={(e) => setLga(e.target.value)}
+                onChange={(e) => setLga(e.target.value.trim())}
               />
               <input
                 placeholder="Photo URL"
                 className="border p-2 rounded w-full"
                 value={photoUrl}
-                onChange={(e) => setPhotoUrl(e.target.value)}
+                onChange={(e) => setPhotoUrl(e.target.value.trim())}
               />
-              <button onClick={addCandidate} className="bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700 transition">Add Candidate</button>
+              <button onClick={addCandidate} className="bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700 transition w-full">Add Candidate</button>
             </div>
           </div>
 
-          <div className="bg-white p-6 rounded-lg shadow space-y-4">
+          <div className="bg-white p-6 rounded-lg shadow space-y-4 border border-gray-200">
             <div className="flex justify-between items-center">
               <h2 className="text-xl font-semibold text-gray-800">Preview Candidates</h2>
               <button onClick={() => setShowPreview(!showPreview)} className="bg-green-600 text-white py-1 px-3 rounded hover:bg-green-700 transition">
-                {showPreview ? "Hide Preview" : "Preview Candidates"}
+                {showPreview ? "Hide Preview" : "Preview"}
               </button>
             </div>
             {showPreview && (
-              <div className="border p-4 rounded mb-4 space-y-4 bg-gray-50">
+              <div className="border p-4 rounded mb-4 space-y-4 bg-gray-50 max-h-64 overflow-auto">
                 <h3 className="text-lg font-bold">Candidates</h3>
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   {candidates.map(c => (
                     <div key={c.id} className="border p-4 rounded flex flex-col items-center bg-white">
                       <img src={c.photoUrl || "/placeholder.png"} alt={c.name} className="w-24 h-24 rounded-full mb-2 object-cover" />
-                      <h4 className="font-semibold text-center text-gray-700">{c.name}</h4>
-                      <p className="text-sm text-center text-gray-600">{c.lga}</p>
+                      <h4 className="font-semibold text-center text-gray-700 text-sm">{c.name}</h4>
+                      <p className="text-xs text-center text-gray-600">{c.lga}</p>
                     </div>
                   ))}
                 </div>
-                <button onClick={publishCandidates} className="mt-4 bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700 transition">Publish Candidates</button>
+                <button onClick={publishCandidates} className="mt-4 bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700 transition w-full">Publish Candidates</button>
               </div>
             )}
           </div>
 
-          <div className="bg-white p-6 rounded-lg shadow space-y-4">
+          <div className="bg-white p-6 rounded-lg shadow space-y-4 border border-gray-200">
             <div className="flex justify-between items-center">
               <h2 className="text-xl font-semibold text-gray-800">Live Results (Current Period)</h2>
-              <button onClick={loadResults} className="bg-gray-300 py-1 px-3 rounded hover:bg-gray-400 transition">
-                Refresh Results
-              </button>
+              <button onClick={loadResults} className="bg-gray-300 py-1 px-3 rounded hover:bg-gray-400 transition">Refresh</button>
             </div>
-            <table className="w-full border-collapse text-left text-sm">
-              <thead>
-                <tr className="bg-gray-200">
-                  <th className="border p-2">Candidate</th>
-                  <th className="border p-2">LGA</th>
-                  <th className="border p-2">Votes</th>
-                </tr>
-              </thead>
-              <tbody>
-                {results.map(r => (
-                  <tr key={r.name}>
-                    <td className="border p-2">{r.name}</td>
-                    <td className="border p-2">{r.lga}</td>
-                    <td className="border p-2">{r.votes}</td>
+            <div className="max-h-64 overflow-auto">
+              <table className="w-full border-collapse text-left text-sm">
+                <thead>
+                  <tr className="bg-gray-200">
+                    <th className="border p-2">Candidate</th>
+                    <th className="border p-2">LGA</th>
+                    <th className="border p-2">Votes</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {results.map(r => (
+                    <tr key={r.name}>
+                      <td className="border p-2">{r.name}</td>
+                      <td className="border p-2">{r.lga}</td>
+                      <td className="border p-2">{r.votes}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
       )}
 
       {activeTab === "past" && (
-        <div className="space-y-8">
+        <div className="bg-white p-6 rounded-lg shadow space-y-4 border border-gray-200">
           <div className="flex justify-between items-center">
             <h2 className="text-xl font-semibold text-gray-800">Past Voting Periods</h2>
             <button onClick={loadAllPeriods} className="bg-gray-200 hover:bg-gray-300 text-gray-800 py-1 px-3 rounded">
               Refresh Periods
             </button>
           </div>
-          <div className="bg-white p-6 rounded-lg shadow space-y-4">
-            <select 
-              className="border p-2 rounded w-full"
-              value={selectedPastPeriod || ""}
-              onChange={(e) => setSelectedPastPeriod(e.target.value)}
-            >
-              <option value="">Select a Past Period</option>
-              {periods.filter(p => p.id !== (period ? period.id : null)).map(p => (
-                <option key={p.id} value={p.id}>
-                  Period {p.id} (Starts: {new Date(p.startTime).toLocaleString()}, Ends: {new Date(p.endTime).toLocaleString()})
-                </option>
-              ))}
-            </select>
+          <select 
+            className="border p-2 rounded w-full"
+            value={selectedPastPeriod || ""}
+            onChange={(e) => setSelectedPastPeriod(e.target.value)}
+          >
+            <option value="">Select a Past Period</option>
+            {periods.filter(p => p.id !== (period ? period.id : null)).map(p => (
+              <option key={p.id} value={p.id}>
+                Period {p.id} (Starts: {new Date(p.startTime).toLocaleString()}, Ends: {new Date(p.endTime).toLocaleString()})
+              </option>
+            ))}
+          </select>
 
-            {selectedPastPeriod && (
-              <>
-                <h3 className="text-lg font-bold text-gray-700 mt-4">Candidates for Period {selectedPastPeriod}</h3>
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                  {pastCandidates.map(c => (
-                    <div key={c.id} className="border p-4 rounded flex flex-col items-center bg-gray-50">
-                      <img src={c.photoUrl || "/placeholder.png"} alt={c.name} className="w-24 h-24 rounded-full mb-2 object-cover" />
-                      <h4 className="font-semibold text-center text-gray-700">{c.name}</h4>
-                      <p className="text-sm text-center text-gray-600">{c.lga}</p>
-                    </div>
-                  ))}
-                </div>
+          {selectedPastPeriod && pastCandidates.length > 0 && (
+            <>
+              <h3 className="text-lg font-bold text-gray-700 mt-4">Candidates for Period {selectedPastPeriod}</h3>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                {pastCandidates.map(c => (
+                  <div key={c.id} className="border p-4 rounded flex flex-col items-center bg-gray-50">
+                    <img src={c.photoUrl || "/placeholder.png"} alt={c.name} className="w-24 h-24 rounded-full mb-2 object-cover" />
+                    <h4 className="font-semibold text-center text-gray-700">{c.name}</h4>
+                    <p className="text-sm text-center text-gray-600">{c.lga}</p>
+                  </div>
+                ))}
+              </div>
 
-                <h3 className="text-lg font-bold text-gray-700 mt-8">Results for Period {selectedPastPeriod}</h3>
+              <h3 className="text-lg font-bold text-gray-700 mt-8">Results for Period {selectedPastPeriod}</h3>
+              <div className="max-h-64 overflow-auto">
                 <table className="w-full border-collapse text-left text-sm mt-4">
                   <thead>
                     <tr className="bg-gray-200">
@@ -347,9 +344,9 @@ export default function Admin() {
                     ))}
                   </tbody>
                 </table>
-              </>
-            )}
-          </div>
+              </div>
+            </>
+          )}
         </div>
       )}
     </div>

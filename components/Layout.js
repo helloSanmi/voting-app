@@ -1,4 +1,7 @@
 // frontend/components/Layout.js
+// Ensure userName shows properly. Use the same logic but ensure userName is set after we get user data.
+// If userName is still not showing, maybe the userData doesn't have fullName or username. Check fallback logic.
+
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
@@ -28,12 +31,16 @@ export default function Layout({ children }) {
       if (res.ok) {
         const userData = await res.json();
         setLoggedIn(true);
-        setUserName(userData.name);
-        if (userData.email === "admin" || userData.email === "admin@example.com" || userData.id === 9999) {
-          setIsAdmin(true);
-        } else {
-          setIsAdmin(false);
-        }
+        let nameToShow = userData.fullName && userData.fullName.trim() !== "" 
+          ? userData.fullName 
+          : (userData.username && userData.username.trim() !== "" 
+            ? userData.username 
+            : userData.email);
+        // Ensure nameToShow is defined properly
+        if (!nameToShow || nameToShow.trim() === "") nameToShow = userData.email;
+        setUserName(nameToShow);
+        const adminFlag = localStorage.getItem("isAdmin");
+        setIsAdmin(adminFlag === "true");
       } else {
         localStorage.removeItem("token");
         setLoggedIn(false);
@@ -85,6 +92,8 @@ export default function Layout({ children }) {
     );
   }
 
+  const isAdminPage = router.pathname === "/admin";
+
   return (
     <div className="min-h-screen flex flex-col bg-gray-100 relative">
       {loading && (
@@ -108,8 +117,8 @@ export default function Layout({ children }) {
             <Link href="/">
               <img src="/logo.png" alt="Logo" className="h-10 w-10 cursor-pointer" />
             </Link>
-            {loggedIn && (
-              <span className="text-gray-800 font-medium">Hi, {userName}</span>
+            {loggedIn && userName && (
+              <span className="text-gray-800 font-medium">Welcome back, {userName}!</span>
             )}
           </div>
           <nav className="flex flex-wrap space-x-3 items-center justify-center">
@@ -146,7 +155,7 @@ export default function Layout({ children }) {
                 </Link>
               </>
             )}
-            {loggedIn && isAdmin && (
+            {loggedIn && isAdmin && !isAdminPage && (
               <Link href="/admin">
                 <span className="cursor-pointer px-3 py-1 bg-blue-200 text-gray-800 rounded hover:bg-blue-300 hover:scale-105 transform transition">
                   Admin

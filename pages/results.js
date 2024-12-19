@@ -1,4 +1,6 @@
-// Adjusted results.js (frontend/pages/results.js)
+// frontend/pages/results.js
+// Center "Results not published yet" message at center of page
+
 import { useState, useEffect } from "react";
 
 export default function Results() {
@@ -25,7 +27,7 @@ export default function Results() {
 
   if (!canView) {
     return (
-      <div className="min-h-screen bg-gray-100 flex items-center justify-center p-4">
+      <div className="min-h-screen flex items-center justify-center">
         <div className="bg-white p-8 rounded-lg shadow-md max-w-md w-full text-center">
           <h1 className="text-2xl font-bold mb-6 text-gray-800">Results not published yet</h1>
           <p className="text-gray-700">Check back later or refresh once admin publishes results.</p>
